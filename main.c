@@ -1,25 +1,25 @@
 //TXN := Transação
 
 #include <stdio.h>
-
-typedef struct list_t {
-  int size;
-  void *head;
-  void *next;
-} list_t;
+#include "liblista.h"
 
 typedef struct txn_t {
   int id;
-  int time;
-  char op;
-  char attr;
+  lista_t *ops;
+  lista_t *edges;
 } txn_t;
+
+typedef struct op_t {
+  int time;
+  char type;
+  char attr;
+} op_t;
 
 typedef struct scale_t {
   int id;
   int serial;
   int equiv;
-  list_t *txns;
+  lista_t *txns;
 } scale_t;
 
 void listAdd(){
