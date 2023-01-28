@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "liblista.h"
 
+typedef enum { READ, WRITE, COMMIT } OpType;
+
 typedef struct txn_t {
   int id;
   lista_t *ops;
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]) {
     int time, txn_id;
     char op, attr;
     char *line = malloc(sizeof(char) * 9);
-    list_t *scales, *open_txns;
+    lista_t *scales, *open_txns;
 
     listAdd(scales, createScale(1));
 
