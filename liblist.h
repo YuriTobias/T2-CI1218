@@ -2,15 +2,15 @@
 #define _LIBlist_t_H
 
 struct node_l {
-  void* key;           /* lista de numeros inteiros */
-  struct node_l* prev; /* ponteiro para o proximo   */
-  struct node_l* next; /* ponteiro para o proximo   */
+    void* key;           /* lista de numeros inteiros */
+    struct node_l* prev; /* ponteiro para o proximo   */
+    struct node_l* next; /* ponteiro para o proximo   */
 };
 typedef struct node_l node_l_t;
 
 struct list {
-  node_l_t* head; /* ponteiro para o inicio da lista */
-  int size;       /* numero de elementos na lista    */
+    node_l_t* head; /* ponteiro para o inicio da lista */
+    int size;       /* numero de elementos na lista    */
 };
 typedef struct list list_t;
 
@@ -66,6 +66,8 @@ int list_remove_end(list_t* l);
  * Se o elemento nao for encontrado na lista tambem retorna 0.
  */
 int list_remove_key(list_t* l, void* key);
+
+int list_remove_node(list_t* l, void* key);
 
 /*
  * Retorna 1 se o elemento existe na lista e 0 caso contrario.
