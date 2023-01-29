@@ -7,9 +7,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-stack_t *create_stack(int size) {
-    stack_t *stack;
-    if (!(stack = malloc(sizeof(stack_t)))) {
+Stack *StackCreate(int size) {
+    Stack *stack;
+    if (!(stack = malloc(sizeof(Stack)))) {
         return NULL;
     }
     stack->head = -1;
@@ -21,8 +21,8 @@ stack_t *create_stack(int size) {
     return stack;
 }
 
-int push(stack_t *stack, void *elem) {
-    if (stack_size(stack) < stack->size) {
+int StackPush(Stack *stack, void *elem) {
+    if (StackSize(stack) < stack->size) {
         stack->head++;
         stack->elems[stack->head] = elem;
         return stack->head + 1;
@@ -31,40 +31,40 @@ int push(stack_t *stack, void *elem) {
             return -1;
         }
         stack->size += STACK_LEN;
-        push(stack, elem);
+        StackPush(stack, elem);
     }
     return -1;
 }
 
-void *pop(stack_t *stack) {
+void *StackPop(Stack *stack) {
     void *popped;
-    if (!empty_stack(stack)) {
-        popped = stack_head(stack);
+    if (!StackIsEmpty(stack)) {
+        popped = StackHead(stack);
         stack->head--;
         return popped;
     }
     return 0;
 }
 
-void *stack_head(stack_t *stack) {
-    if (!empty_stack(stack)) {
+void *StackHead(Stack *stack) {
+    if (!StackIsEmpty(stack)) {
         return stack->elems[stack->head];
     }
     return 0;
 }
 
-int stack_size(stack_t *stack) { return stack->head + 1; }
+int StackSize(Stack *stack) { return stack->head + 1; }
 
-int empty_stack(stack_t *stack) {
-    if (stack_size(stack) == 0) {
+int StackIsEmpty(Stack *stack) {
+    if (StackSize(stack) == 0) {
         return 1;
     }
     return 0;
 }
 
-stack_t *destroy_stack(stack_t *stack) {
+Stack *StackDestroy(Stack *stack) {
     int cont;
-    for (cont = 0; cont < stack_size(stack); cont++) {
+    for (cont = 0; cont < StackSize(stack); cont++) {
         free(stack->elems[cont]);
     }
     free(stack->elems);
