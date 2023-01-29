@@ -1,77 +1,75 @@
 #ifndef _LIBlist_t_H
 #define _LIBlist_t_H
 
-struct node_l {
-    void* key;           /* lista de numeros inteiros */
-    struct node_l* prev; /* ponteiro para o proximo   */
-    struct node_l* next; /* ponteiro para o proximo   */
-};
-typedef struct node_l node_l_t;
+typedef struct Node {
+    void* key;         /* lista de numeros inteiros */
+    struct Node* prev; /* ponteiro para o proximo   */
+    struct Node* next; /* ponteiro para o proximo   */
+} Node;
 
-struct list {
-    node_l_t* head; /* ponteiro para o inicio da lista */
-    int size;       /* numero de elementos na lista    */
-};
-typedef struct list list_t;
+typedef struct List {
+    Node* head; /* ponteiro para o inicio da lista */
+    int size;   /* numero de elementos na lista    */
+} List;
 
 /*
  * Cria uma lista vazia e a retorna, se falhar retorna NULL.
  */
-list_t* create_list();
+List* ListCreate();
 
 /*
  * Remove todos os elementos da lista, libera espaco e retorna NULL.
  */
-list_t* destroy_list(list_t* l);
+List* ListDestroy(List* l);
 
-list_t* empty_list(list_t* l);
+List* ListRemoveAll(List* l);
 
 /*
  * Retorna 1 se a lista esta vazia e 0 caso contrario.
  */
-int is_list_empty(list_t* l);
+int ListIsEmpty(List* l);
 
 /*
  * Retorna o tamanho da lista, isto eh, o numero de elementos presentes nela.
  */
-int list_size(list_t* l);
+int ListSize(List* l);
 
 /*
  * Insere o elemento no inicio da lista.
  * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
  */
-int list_insert_start(list_t* l, void* key);
+int ListInsertStart(List* l, void* key);
 
 /*
  * Insere o elemento no final da lista.
  * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
  */
-int list_insert_end(list_t* l, void* key);
+int ListInsertEnd(List* l, void* key);
 
 /*
  * Remove o elemento do inicio da lista e o retorna em 'elemento'.
  * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
  */
-int list_remove_start(list_t* l);
+void* ListRemoveStart(List* l);
 
 /*
  * Remove o elemento do final da lista e o retorna em 'elemento'.
  * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
  */
-int list_remove_end(list_t* l);
+void* ListRemoveEnd(List* l);
 
 /*
  * Remove o elemento 'elemento' caso ele exista na lista.
  * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
  * Se o elemento nao for encontrado na lista tambem retorna 0.
  */
-int list_remove_key(list_t* l, void* key);
+void* ListRemoveKey(List* l, void* key);
 
-int list_remove_node(list_t* l, void* key);
+int list_remove_node(List* l, void* key);
 
 /*
  * Retorna 1 se o elemento existe na lista e 0 caso contrario.
  */
-int list_contains(list_t* l, void* key);
+int ListContains(List* l, void* key);
 
 #endif
