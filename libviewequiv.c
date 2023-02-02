@@ -3,22 +3,10 @@
 
 #include "libvieweq.h"
 
-int ListContainsTxn(List *l, Txn *key) {
-    if (!ListIsEmpty(l)) {
-        Node *target = l->head;
-        while (target != NULL) {
-            if (((Txn *)target->key)->id == key->id) {
-                return 1;
-            }
-            target = target->next;
-        }
-    }
-    return 0;
-}
-
 int lastWrite(Scale *s) {
     Node *curTxn = s->txns->head;
     int last = -1;
+    // Itera nas operações do escalonamento a fim de achar o último WRITE
     while (curTxn != NULL) {
         Node *curOp = ((Txn *)curTxn->key)->ops->head;
         while (curOp != NULL) {
@@ -32,33 +20,7 @@ int lastWrite(Scale *s) {
     return last;
 }
 
-void *ListRemoveTxn(List *l, Txn *key) {
-    if (!ListIsEmpty(l) && ListContainsTxn(l, key)) {
-        Node *target = l->head;
-
-        while (((Txn *)target->key)->id != key->id) {
-            target = target->next;
-        }
-
-        if (target->prev) {
-            target->prev->next = target->next;
-        } else {
-            l->head = target->next;
-        }
-
-        if (target->next) {
-            target->next->prev = target->prev;
-        }
-
-        void *removed = (target->key);
-        free(target);
-        l->size--;
-        return removed;
-    }
-    return NULL;
-}
-
-int checkEquivalence(List *opsEmpilhadas, int lastWrite) {
+int checkViewEquivalence(List *opsEmpilhadas, int lastWrite) {
     Node *curNode = opsEmpilhadas->head;
     while (curNode != NULL) {
         Op *curOp = ((Op *)curNode->key);
@@ -91,29 +53,27 @@ int checkEquivalence(List *opsEmpilhadas, int lastWrite) {
     return 1;
 }
 
-int permutaTxns(List *stackedTxns, List *availableTxns, int lastWrite) {
+int swapTxns(List *stackedTxns, List *availableTxns, int lastWrite) {
     if (ListIsEmpty(availableTxns)) {
-        // Node *c = stackedTxns->head;
-        // while (c != NULL) {
-        //     printf("%i ", ((Op *)c->key)->time);
-        //     c = c->next;
-        // }
-        // printf("%s\n", checkEquivalence(stackedTxns, lastWrite) ? "Equivalente" : "Não Equivalente");
-        return checkEquivalence(stackedTxns, lastWrite);
+        return checkViewEquivalence(stackedTxns, lastWrite);
+
     } else {
-        Node *curNode = availableTxns->head;
-        while (curNode != NULL) {
+        // Itera pelas transações ainda não empilhadas, realizando chamadas recursivas para cada caminho possível
+        Node *curTxnNode = availableTxns->head;
+        while (curTxnNode != NULL) {
+            Txn *curTxn = ((Txn *)curTxnNode->key);
+            // Empilha uma transações dentre as disponíveis e realiza a chamada recursiva
             List *stackedTxnsRec = ListCopy(stackedTxns);
             List *availableTxnsRec = ListCopy(availableTxns);
-            ListRemoveTxn(availableTxnsRec, ((Txn *)curNode->key));
+            ListRemoveTxn(availableTxnsRec, curTxn);
 
-            Node *opAtual = ((Txn *)curNode->key)->ops->head;
-            while (opAtual != NULL) {
-                ListInsertEnd(stackedTxnsRec, opAtual->key);
-                opAtual = opAtual->next;
+            Node *curOpNode = curTxn->ops->head;
+            while (curOpNode != NULL) {
+                ListInsertEnd(stackedTxnsRec, curOpNode->key);
+                curOpNode = curOpNode->next;
             }
 
-            if (permutaTxns(stackedTxnsRec, availableTxnsRec, lastWrite) == 1) {
+            if (swapTxns(stackedTxnsRec, availableTxnsRec, lastWrite) == 1) {
                 ListSoftRemoveAll(stackedTxnsRec);
                 ListSoftRemoveAll(availableTxnsRec);
                 free(availableTxnsRec);
@@ -125,18 +85,18 @@ int permutaTxns(List *stackedTxns, List *availableTxns, int lastWrite) {
             ListSoftRemoveAll(availableTxnsRec);
             free(availableTxnsRec);
             free(stackedTxnsRec);
-            curNode = curNode->next;
+            curTxnNode = curTxnNode->next;
         }
         return 0;
     }
 }
 
-int checkViewEquivalence(Scale *s) {
+int checkViewEquivalenceWrapper(Scale *s) {
     // Empilhará as transações em todas as ordens possíveis
     List *stackedTxns = ListCreate();         // Lista vazia com os nodos empilhados
     List *availableTxns = ListCopy(s->txns);  // Lista com os nodos ainda disponíveis para empilhar (todos)
 
-    if (permutaTxns(stackedTxns, availableTxns, lastWrite(s)) == 1) {
+    if (swapTxns(stackedTxns, availableTxns, lastWrite(s)) == 1) {
         ListSoftRemoveAll(stackedTxns);
         ListSoftRemoveAll(availableTxns);
         free(stackedTxns);

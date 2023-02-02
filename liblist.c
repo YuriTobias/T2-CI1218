@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*
- * Cria uma lista vazia e a retorna, se falhar retorna NULL.
- */
 List *ListCreate() {
     List *list;
     if (!(list = malloc(sizeof(List)))) {
@@ -28,10 +25,7 @@ Node *ListCreateNode(void *key) {
     return node;
 }
 
-/*
- * Remove todos os elementos da lista, libera espaco e retorna NULL.
- */
-List *ListDestroy(List *l) {
+void ListHardDestroy(List *l) {
     Node *ini = l->head;
     while (ini != NULL) {
         Node *target = ini;
@@ -40,10 +34,9 @@ List *ListDestroy(List *l) {
         free(target);
     }
     free(l);
-    return NULL;
 }
 
-List *ListHardRemoveAll(List *l) {
+void ListHardRemoveAll(List *l) {
     Node *ini = l->head;
     while (ini != NULL) {
         Node *target = ini;
@@ -53,10 +46,9 @@ List *ListHardRemoveAll(List *l) {
     }
     l->head = NULL;
     l->size = 0;
-    return NULL;
 }
 
-List *ListSoftRemoveAll(List *l) {
+void ListSoftRemoveAll(List *l) {
     Node *ini = l->head;
     while (ini != NULL) {
         Node *target = ini;
@@ -65,12 +57,8 @@ List *ListSoftRemoveAll(List *l) {
     }
     l->head = NULL;
     l->size = 0;
-    return NULL;
 }
 
-/*
- * Retorna 1 se a lista esta vazia e 0 caso contrario.
- */
 int ListIsEmpty(List *l) {
     if (l->size == 0) {
         return 1;
@@ -78,15 +66,8 @@ int ListIsEmpty(List *l) {
     return 0;
 }
 
-/*
- * Retorna o tamanho da lista, isto eh, o numero de elementos presentes nela.
- */
 int ListSize(List *l) { return l->size; }
 
-/*
- * Insere o elemento no inicio da lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- */
 int ListInsertStart(List *l, void *key) {
     Node *node = NULL;
     node = ListCreateNode(key);
@@ -104,10 +85,6 @@ int ListInsertStart(List *l, void *key) {
     return 0;
 }
 
-/*
- * Insere o elemento no final da lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- */
 int ListInsertEnd(List *l, void *key) {
     Node *node = NULL;
     node = ListCreateNode(key);
@@ -128,11 +105,7 @@ int ListInsertEnd(List *l, void *key) {
     return 0;
 }
 
-/*
- * Remove o elemento do inicio da lista e o retorna em 'elemento'.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- */
-void *ListRemoveStart(List *l) {
+void *ListSoftRemoveStart(List *l) {
     if (!ListIsEmpty(l)) {
         Node *target = l->head;
         l->head = target->next;
@@ -145,11 +118,7 @@ void *ListRemoveStart(List *l) {
     return NULL;
 }
 
-/*
- * Remove o elemento do final da lista e o retorna em 'elemento'.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- */
-void *ListRemoveEnd(List *l) {
+void *ListSoftRemoveEnd(List *l) {
     if (!ListIsEmpty(l)) {
         Node *target = l->head;
         while (target->next) {
@@ -168,12 +137,7 @@ void *ListRemoveEnd(List *l) {
     return NULL;
 }
 
-/*
- * Remove o elemento 'elemento' caso ele exista na lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- * Se o elemento nao for encontrado na lista tambem retorna 0.
- */
-void *ListRemoveKey(List *l, void *key) {
+void *ListSoftRemoveKey(List *l, void *key) {
     if (!ListIsEmpty(l) && ListContains(l, key)) {
         Node *target = l->head;
 
@@ -199,9 +163,6 @@ void *ListRemoveKey(List *l, void *key) {
     return NULL;
 }
 
-/*
- * Retorna 1 se o elemento existe na lista e 0 caso contrario.
- */
 int ListContains(List *l, void *key) {
     if (!ListIsEmpty(l)) {
         Node *target = l->head;

@@ -4,16 +4,12 @@
 #include "liblist.h"
 #include "libscale.h"
 
-int ListContainsTxn(List *l, Txn *key);
-
 int lastWrite(Scale *s);
 
-void *ListRemoveTxn(List *l, Txn *key);
+int checkViewEquivalence(List *opsEmpilhadas, int lastWrite);
 
-int checkEquivalence(List *opsEmpilhadas, int lastWrite);
+int swapTxns(List *stackedTxns, List *availableTxns, int lastWrite);
 
-int permutaTxns(List *stackedTxns, List *availableTxns, int lastWrite);
-
-int checkViewEquivalence(Scale *s);
+int checkViewEquivalenceWrapper(Scale *s);
 
 #endif
