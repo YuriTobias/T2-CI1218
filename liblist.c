@@ -43,12 +43,24 @@ List *ListDestroy(List *l) {
     return NULL;
 }
 
-List *ListRemoveAll(List *l) {
+List *ListHardRemoveAll(List *l) {
     Node *ini = l->head;
     while (ini != NULL) {
         Node *target = ini;
         ini = ini->next;
         free(target->key);
+        free(target);
+    }
+    l->head = NULL;
+    l->size = 0;
+    return NULL;
+}
+
+List *ListSoftRemoveAll(List *l) {
+    Node *ini = l->head;
+    while (ini != NULL) {
+        Node *target = ini;
+        ini = ini->next;
         free(target);
     }
     l->head = NULL;
@@ -201,4 +213,14 @@ int ListContains(List *l, void *key) {
         }
     }
     return 0;
+}
+
+List *ListCopy(List *source) {
+    List *copy = ListCreate();
+    Node *target = ListIsEmpty(source) ? NULL : source->head;
+    while (target != NULL) {
+        ListInsertEnd(copy, target->key);
+        target = target->next;
+    }
+    return copy;
 }

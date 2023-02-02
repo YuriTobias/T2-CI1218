@@ -22,7 +22,9 @@ List* ListCreate();
  */
 List* ListDestroy(List* l);
 
-List* ListRemoveAll(List* l);
+List* ListHardRemoveAll(List* l);
+
+List* ListSoftRemoveAll(List* l);
 
 /*
  * Retorna 1 se a lista esta vazia e 0 caso contrario.
@@ -71,5 +73,7 @@ int list_remove_node(List* l, void* key);
  * Retorna 1 se o elemento existe na lista e 0 caso contrario.
  */
 int ListContains(List* l, void* key);
+
+List* ListCopy(List* source);
 
 #endif

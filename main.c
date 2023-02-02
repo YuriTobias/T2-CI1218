@@ -2,16 +2,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "liblist.h"
 #include "libscale.h"
 #include "libstack.h"
+#include "libvieweq.h"
 
-int main(int argc, char *argv[]) {
-    int time, txnId;
-    char opCode, attr;
+List *readScales() {
     char *line = malloc(sizeof(char) * 9);
     List *scales, *openTxns;
+    int time, txnId;
+    char opCode, attr;
 
     scales = ListCreate();    // Lista de escalonamentos
     openTxns = ListCreate();  // Lista de transações em andamento
@@ -30,18 +32,36 @@ int main(int argc, char *argv[]) {
             ListRemoveKey(openTxns, curTxn);
         } else {
             if (curTxn != NULL) {
-                ListInsertStart(curTxn->ops, CreateOp(time, op, attr));
+                ListInsertEnd(curTxn->ops, CreateOp(time, op, attr));
             } else {
                 curTxn = CreateTxn(txnId);
-                ListInsertStart(curScale->txns, curTxn);
-                ListInsertStart(curTxn->ops, CreateOp(time, op, attr));
-                ListInsertStart(openTxns, curTxn);
+                ListInsertEnd(curScale->txns, curTxn);
+                ListInsertEnd(curTxn->ops, CreateOp(time, op, attr));
+                ListInsertEnd(openTxns, curTxn);
             }
         }
     }
 
     free(line);
     ListDestroy(openTxns);
+    return scales;
+}
+
+int main(int argc, char *argv[]) {
+    List *scales = readScales();
+    Node *curScale = scales->head;
+    while (curScale != NULL) {
+        printf("%i ", ((Scale *)curScale->key)->id);
+        Node *curTxn = ((Scale *)curScale->key)->txns->head;
+        printf("%i", ((Txn *)curTxn->key)->id);
+        curTxn = curTxn->next;
+        while (curTxn != NULL) {
+            printf(",%i", ((Txn *)curTxn->key)->id);
+            curTxn = curTxn->next;
+        }
+        printf(" ?? %s\n", (checkViewEquivalence(((Scale *)curScale->key))) ? "SV" : "NV");
+        curScale = curScale->next;
+    }
     ListDestroyScales(scales);
 
     return 0;

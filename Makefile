@@ -11,7 +11,7 @@ debug: CFLAGS += -g -D__DEBUG__
 
 all debug: $(PROGS)
 
-$(PROGS) : % : %.o libstack.o liblist.o libscale.o
+$(PROGS) : % : %.o libstack.o liblist.o libscale.o libviewequiv.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LFLAGS)
 
 clean:
