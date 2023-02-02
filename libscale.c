@@ -32,8 +32,8 @@ Txn *CreateTxn(int id) {
 }
 
 Scale *ListInsertScale(List *scales, Scale *curScale) {
-    Scale *newScale = CreateScale(curScale == NULL ? 0 : curScale->id + 1);
-    ListInsertStart(scales, newScale);
+    Scale *newScale = CreateScale(curScale == NULL ? 1 : curScale->id + 1);
+    ListInsertEnd(scales, newScale);
     return newScale;
 }
 
@@ -74,56 +74,5 @@ void ListDestroyScales(List *scales) {
     free(scales);
 }
 
-void *ListRemoveTxn(List *l, Txn *key) {
-    if (!ListIsEmpty(l) && ListContainsTxn(l, key)) {
-        Node *target = l->head;
-
-        while (((Txn *)target->key)->id != key->id) {
-            target = target->next;
-        }
-
-        if (target->prev) {
-            target->prev->next = target->next;
-        } else {
-            l->head = target->next;
-        }
-
-        if (target->next) {
-            target->next->prev = target->prev;
-        }
-
-        void *removed = (target->key);
-        free(target);
-        l->size--;
-        return removed;
-    }
-    return NULL;
-}
-
-Txn *ListFindTxn(List *l, int id) {
-    if (!ListIsEmpty(l)) {
-        Node *target = l->head;
-        while (target != NULL) {
-            if (((Txn *)target->key)->id == id) {
-                return ((Txn *)target->key);
-            }
-            target = target->next;
-        }
-    }
-    return NULL;
-}
-
-int ListContainsTxn(List *l, Txn *key) {
-    if (!ListIsEmpty(l)) {
-        Node *target = l->head;
-        while (target != NULL) {
-            if (((Txn *)target->key)->id == key->id) {
-                return 1;
-            }
-            target = target->next;
-        }
-    }
-    return 0;
-}
-
 int compareTxns(void *txnA, void *txnB) { return (((Txn *)txnA)->id == ((Txn *)txnB)->id); }
+int compareTxnId(void *txn, void *id) { return (((Txn *)txn)->id == (*(int *)id)); }

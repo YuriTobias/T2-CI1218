@@ -65,7 +65,7 @@ int swapTxns(List *stackedTxns, List *availableTxns, int lastWrite) {
             // Empilha uma transações dentre as disponíveis e realiza a chamada recursiva
             List *stackedTxnsRec = ListCopy(stackedTxns);
             List *availableTxnsRec = ListCopy(availableTxns);
-            ListRemoveTxn(availableTxnsRec, curTxn);
+            ListSoftRemoveKey(availableTxnsRec, curTxn, &compareTxns);
 
             Node *curOpNode = curTxn->ops->head;
             while (curOpNode != NULL) {

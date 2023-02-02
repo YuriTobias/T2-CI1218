@@ -95,18 +95,20 @@ void* ListSoftRemoveEnd(List* l);
  * @brief Busca uma chave específica na lista e a remove.
  * @param l A lista na qual a chave será buscada e removida.
  * @param key A chave que será buscada e removida.
+ * @param comparator A função que será usada para comparar duas chaves e avaliar a presença na lista.
  * @result Um ponteiro para a chave removida da lista ou NULL caso não encontre-a.
  */
-void* ListSoftRemoveKey(List* l, void* key);
+void* ListSoftRemoveKey(List* l, void* key, int (*comparator)(void*, void*));
 
 /*!
- * @name ListContains
- * @brief Informa se uma chave está ou não contida na lista.
+ * @name ListFindKey
+ * @brief Busca e retorna uma chave na lista.
  * @param l A lista na qual a chave será buscada.
- * @param key A chave que será buscada.
- * @result 1 se encontrar a chave, 0 caso contrário.
+ * @param key O valor que será usado para buscar a chave.
+ * @param comparator A função que será usada para encontrar a chave na lista.
+ * @result Um ponteiro para a chave encontrada da lista ou NULL caso não encontre-a.
  */
-int ListContains(List* l, void* key);
+void* ListFindKey(List* l, void* key, int (*comparator)(void*, void*));
 
 /*!
  * @name ListCopy

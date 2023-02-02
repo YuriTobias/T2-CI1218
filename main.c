@@ -25,11 +25,11 @@ List *readScales() {
         }
 
         sscanf(line, "%d %d %c %c", &time, &txnId, &opCode, &attr);
-        Txn *curTxn = ListFindTxn(curScale->txns, txnId);
+        Txn *curTxn = ListFindKey(curScale->txns, &txnId, &compareTxnId);
         OpType op = ConvertOpType(opCode);
 
         if (op == COMMIT) {
-            ListSoftRemoveKey(openTxns, curTxn);
+            ListSoftRemoveKey(openTxns, curTxn, &compareTxns);
         } else {
             if (curTxn != NULL) {
                 ListInsertEnd(curTxn->ops, CreateOp(time, op, attr));
@@ -71,6 +71,7 @@ void printResults(List *scales) {
 
         curTxnNode = curTxnNode->next;
         while (curTxnNode != NULL) {
+            curTxn = ((Txn *)curTxnNode->key);
             printf(",%i", curTxn->id);
             curTxnNode = curTxnNode->next;
         }

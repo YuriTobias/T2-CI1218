@@ -137,11 +137,11 @@ void *ListSoftRemoveEnd(List *l) {
     return NULL;
 }
 
-void *ListSoftRemoveKey(List *l, void *key) {
-    if (!ListIsEmpty(l) && ListContains(l, key)) {
+void *ListSoftRemoveKey(List *l, void *key, int (*comparator)(void *, void *)) {
+    if (!ListIsEmpty(l) && ListFindKey(l, key, comparator)) {
         Node *target = l->head;
 
-        while (target->key != key) {
+        while (!(comparator(target->key, key))) {
             target = target->next;
         }
 
@@ -163,17 +163,17 @@ void *ListSoftRemoveKey(List *l, void *key) {
     return NULL;
 }
 
-int ListContains(List *l, void *key) {
+void *ListFindKey(List *l, void *key, int (*comparator)(void *, void *)) {
     if (!ListIsEmpty(l)) {
         Node *target = l->head;
         while (target != NULL) {
-            if (target->key == key) {
-                return 1;
+            if (comparator(target->key, key)) {
+                return target->key;
             }
             target = target->next;
         }
     }
-    return 0;
+    return NULL;
 }
 
 List *ListCopy(List *source) {
