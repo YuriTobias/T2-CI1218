@@ -7,40 +7,40 @@
 
 #define STACK_LEN 100
 
-typedef struct {
+typedef struct Stack {
     void** elems;
     int size;
     int head;
-} stack_t;
+} Stack;
 
 /*
  * Cria e retorna uma nova pilha com capacidade de size elementos.
  * Retorna NULL em caso de erro de alocação
  */
-stack_t* create_stack(int size);
+Stack* StackCreate(int size);
 
 /*
  * Insere elem na pilha (politica LIFO). Caso a pilha esteja cheia, tenta realocá-la.
  * Retorna o número de elementos na pilha em caso de sucesso e -1 para falha de realocação;
  */
-int push(stack_t* stack, void* elem);
+int StackPush(Stack* stack, void* elem);
 
 /*
  * Remove (politica LIFO) e retorna um elemento da pilha.
  * Em caso de pilha vazia retorna 0
  */
-void* pop(stack_t* stack);
+void* StackPop(Stack* stack);
 
 /* Similar ao Pop, mas retorna sem remover */
-void* stack_head(stack_t* stack);
+void* StackHead(Stack* stack);
 
 /* Retorna o numero de elementos da pilha, que pode ser 0 */
-int stack_size(stack_t* stack);
+int StackSize(Stack* stack);
 
 /* Retorna 1 se pilha vazia, 0 em caso contrario */
-int empty_stack(stack_t* stack);
+int StackIsEmpty(Stack* stack);
 
-/* Desaloca memoria de stack_t e retorna NULL */
-stack_t* destroy_stack(stack_t* stack);
+/* Desaloca memoria de Stack e retorna NULL */
+Stack* StackDestroy(Stack* stack);
 
 #endif
