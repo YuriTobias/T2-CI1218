@@ -1,4 +1,4 @@
-PROGS = main
+PROGS = escalona
 
 CC = gcc
 CFLAGS = -std=c99 -Wall -g
