@@ -1,5 +1,3 @@
-// TXN := Transação
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -53,7 +51,7 @@ void checkResults(List *scales) {
     while (curScNode != NULL) {
         Scale *curSc = ((Scale *)curScNode->key);
         curSc->serial = 0;
-        curSc->equiv = (checkViewEquivalenceWrapper(curSc));
+        curSc->equiv = (swapAndCheckEquivalence(curSc));
         curScNode = curScNode->next;
     }
 }
