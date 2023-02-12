@@ -24,20 +24,20 @@ typedef struct {
     List *txns;
 } Scale;
 
-Txn *ListFindTxn(List *l, int id);
-
 Scale *CreateScale(int id);
 
 Op *CreateOp(int time, OpType type, char attr);
 
 Txn *CreateTxn(int id);
 
-// void ImprimeOperacoes(List *scales);
-
-void ListInsertScale(List *scales);
+Scale *ListInsertScale(List *scales, Scale *curScale);
 
 OpType ConvertOpType(char c);
 
 void ListDestroyScales(List *scales);
+
+int compareTxns(void *txnA, void *txnB);
+
+int compareTxnId(void *txn, void *id);
 
 #endif

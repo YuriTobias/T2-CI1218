@@ -2,74 +2,120 @@
 #define _LIBlist_t_H
 
 typedef struct Node {
-    void* key;         /* lista de numeros inteiros */
-    struct Node* prev; /* ponteiro para o proximo   */
-    struct Node* next; /* ponteiro para o proximo   */
+    void* key;         /* Uma chave que estará armazenada na lista ligada */
+    struct Node* prev; /* Ponteiro para o nó anterior de uma lista ligada */
+    struct Node* next; /* Ponteiro para o próximo nó de uma lista ligada */
 } Node;
 
 typedef struct List {
-    Node* head; /* ponteiro para o inicio da lista */
-    int size;   /* numero de elementos na lista    */
+    Node* head; /* Ponteiro para o inicio da lista */
+    int size;   /* Número de elementos na lista    */
 } List;
 
-/*
- * Cria uma lista vazia e a retorna, se falhar retorna NULL.
+/*!
+ * @name ListCreate
+ * @brief Cria uma lista vazia.
+ * @result Um ponteiro para a lista criada.
  */
 List* ListCreate();
 
-/*
- * Remove todos os elementos da lista, libera espaco e retorna NULL.
+/*!
+ * @name ListHardDestroy
+ * @brief Desaloca a lista e todas as suas chaves.
+ * @param l A lista que será desalocada junto com suas chaves.
  */
-List* ListDestroy(List* l);
+void ListHardDestroy(List* l);
 
-List* ListRemoveAll(List* l);
+/*!
+ * @name ListHardRemoveAll
+ * @brief Remove todas as chaves da lista e também as desaloca.
+ * @param l A lista na qual todas as chaves serão removidas e desalocadas.
+ */
+void ListHardRemoveAll(List* l);
 
-/*
- * Retorna 1 se a lista esta vazia e 0 caso contrario.
+/*!
+ * @name ListSoftRemoveAll
+ * @brief Remove todas as chaves da lista.
+ * @param l A lista na qual todas as chaves serão removidas.
+ */
+void ListSoftRemoveAll(List* l);
+
+/*!
+ * @name ListIsEmpty
+ * @brief Informa se a lista está vazia.
+ * @param l A lista que deseja-se saber estar vazia ou não.
+ * @result 1 se a lista estiver vazia, 0 caso contrário.
  */
 int ListIsEmpty(List* l);
 
-/*
- * Retorna o tamanho da lista, isto eh, o numero de elementos presentes nela.
+/*!
+ * @name ListSize
+ * @brief Informa o tamanho da lista.
+ * @param l A lista cujo tamanho deseja-se saber.
+ * @result O tamanho da lista.
  */
 int ListSize(List* l);
 
-/*
- * Insere o elemento no inicio da lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+/*!
+ * @name ListInsertStart
+ * @brief Insere uma chave no início da lista.
+ * @param l A lista na qual a chave será inserida.
+ * @param key A chave que será inserida.
+ * @result 1 para operação bem sucedida, 0 caso contrário.
  */
 int ListInsertStart(List* l, void* key);
 
-/*
- * Insere o elemento no final da lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+/*!
+ * @name ListInsertEnd
+ * @brief Insere uma chave no fim da lista.
+ * @param l A lista na qual a chave será inserida.
+ * @param key A chave que será inserida.
+ * @result 1 para operação bem sucedida, 0 caso contrário.
  */
 int ListInsertEnd(List* l, void* key);
 
-/*
- * Remove o elemento do inicio da lista e o retorna em 'elemento'.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+/*!
+ * @name ListSoftRemoveStart
+ * @brief Remove a primeira chave da lista.
+ * @param l A lista na qual a chave será removida.
+ * @result Um ponteiro para a chave removida da lista ou NULL caso não encontre-a.
  */
-void* ListRemoveStart(List* l);
+void* ListSoftRemoveStart(List* l);
 
-/*
- * Remove o elemento do final da lista e o retorna em 'elemento'.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+/*!
+ * @name ListSoftRemoveEnd
+ * @brief Remove a última chave da lista.
+ * @param l A lista na qual a chave será removida.
+ * @result Um ponteiro para a chave removida da lista ou NULL caso não encontre-a.
  */
-void* ListRemoveEnd(List* l);
+void* ListSoftRemoveEnd(List* l);
 
-/*
- * Remove o elemento 'elemento' caso ele exista na lista.
- * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
- * Se o elemento nao for encontrado na lista tambem retorna 0.
+/*!
+ * @name ListSoftRemoveKey
+ * @brief Busca uma chave específica na lista e a remove.
+ * @param l A lista na qual a chave será buscada e removida.
+ * @param key A chave que será buscada e removida.
+ * @param comparator A função que será usada para comparar duas chaves e avaliar a presença na lista.
+ * @result Um ponteiro para a chave removida da lista ou NULL caso não encontre-a.
  */
-void* ListRemoveKey(List* l, void* key);
+void* ListSoftRemoveKey(List* l, void* key, int (*comparator)(void*, void*));
 
-int list_remove_node(List* l, void* key);
-
-/*
- * Retorna 1 se o elemento existe na lista e 0 caso contrario.
+/*!
+ * @name ListFindKey
+ * @brief Busca e retorna uma chave na lista.
+ * @param l A lista na qual a chave será buscada.
+ * @param key O valor que será usado para buscar a chave.
+ * @param comparator A função que será usada para encontrar a chave na lista.
+ * @result Um ponteiro para a chave encontrada da lista ou NULL caso não encontre-a.
  */
-int ListContains(List* l, void* key);
+void* ListFindKey(List* l, void* key, int (*comparator)(void*, void*));
+
+/*!
+ * @name ListCopy
+ * @brief Realiza a cópia de uma lista fornecida.
+ * @param source A lista fonte a ser copiada.
+ * @result Um ponteiro para a cópia realizada.
+ */
+List* ListCopy(List* source);
 
 #endif
