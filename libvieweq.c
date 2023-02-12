@@ -3,30 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// int lastWrite(Scale *s) {
-//     Node *curTxnNode = s->txns->head;
-//     int last = -1;
-//     // Itera todas as transações do escalonamento em busca da última operação WRITE (max{op->time})
-//     while (curTxnNode != NULL) {
-//         Txn *curTxn = ((Txn *)curTxnNode->key);
-//         Node *curOpNode = curTxn->ops->head;
-
-//         while (curOpNode != NULL) {
-//             Op *curOp = ((Op *)curOpNode->key);
-
-//             if (curOp->time > last) {
-//                 last = curOp->time;
-//             }
-
-//             curOpNode = curOpNode->next;
-//         }
-
-//         curTxnNode = curTxnNode->next;
-//     }
-
-//     return last;
-// }
-
 int checkViewEquivalence(List *opsEmpilhadas, List *scaleAttrs) {
     Node *curOpNode = opsEmpilhadas->head;
     // Itera por todas as operações do escalonamento S' para avaliar sua equivalência com o S original
@@ -36,12 +12,12 @@ int checkViewEquivalence(List *opsEmpilhadas, List *scaleAttrs) {
 
         if (curOp->type == READ) {
             // Checa se não há writes anteriores ao read que deveriam estar após ele
-            Node *prevNode = curOpNode->prev;
+            Node *prevOpNode = curOpNode->prev;
             int foundWritter = 0;
-            while (prevNode != NULL && foundWritter == 0) {
-                Op *prevOp = ((Op *)prevNode->key);
+            while (prevOpNode != NULL && foundWritter == 0) {
+                Op *prevOp = ((Op *)prevOpNode->key);
 
-                if (prevOp->type == WRITE) {
+                if (prevOp->type == WRITE && prevOp->attr == curOp->attr) {
                     // Checa se o primeiro WRITE encontrado for diferente do esperado ou sequer era esperado
                     if (curOp->lastWritter == -1 || curOp->lastWritter != prevOp->time) {
                         return 0;
@@ -50,7 +26,7 @@ int checkViewEquivalence(List *opsEmpilhadas, List *scaleAttrs) {
                     }
                 }
 
-                prevNode = prevNode->prev;
+                prevOpNode = prevOpNode->prev;
             }
             // Checa se não foi encontrado WRITE em caso onde era esperado
             if (foundWritter == 0 && curOp->lastWritter != -1) {
@@ -58,15 +34,14 @@ int checkViewEquivalence(List *opsEmpilhadas, List *scaleAttrs) {
             }
         } else if (curOp->type == WRITE && curOp->time == curOpAttr->lastWritter) {
             // Checa se não há writes posteriores após o que deveria ser o último
-            Node *nexNode = curOpNode->next;
-            while (nexNode != NULL) {
-                Op *nextOp = ((Op *)nexNode->key);
-
-                if (nextOp->type == WRITE) {
+            Node *nextOpNode = curOpNode->next;
+            while (nextOpNode != NULL) {
+                Op *nextOp = ((Op *)nextOpNode->key);
+                if (nextOp->type == WRITE && nextOp->attr == curOp->attr) {
                     return 0;
                 }
 
-                nexNode = nexNode->next;
+                nextOpNode = nextOpNode->next;
             }
         }
 
