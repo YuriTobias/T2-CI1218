@@ -6,9 +6,10 @@
 #include "libscale.h"
 #include "libstack.h"
 #include "libvieweq.h"
+#include "libserial.h"
 
 List *readScales() {
-    char *line = malloc(sizeof(char) * 9);
+    char *line = malloc(sizeof(char) * 255);
     List *scales, *openTxns;
     int time, txnId;
     Scale *curScale = NULL;
@@ -17,7 +18,7 @@ List *readScales() {
     scales = ListCreate();    // Lista de escalonamentos
     openTxns = ListCreate();  // Lista de transações em andamento
 
-    while (fgets(line, 9, stdin)) {
+    while (fgets(line, 255, stdin)) {
         if (ListIsEmpty(openTxns)) {
             curScale = ListInsertScale(scales, curScale);
         }
@@ -50,7 +51,7 @@ void checkResults(List *scales) {
 
     while (curScNode != NULL) {
         Scale *curSc = ((Scale *)curScNode->key);
-        curSc->serial = 0;
+        curSc->serial = (checksSeriality(curSc));
         curSc->equiv = (swapAndCheckEquivalence(curSc));
         curScNode = curScNode->next;
     }
