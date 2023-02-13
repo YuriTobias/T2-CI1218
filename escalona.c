@@ -4,7 +4,6 @@
 
 #include "liblist.h"
 #include "libscale.h"
-#include "libstack.h"
 #include "libvieweq.h"
 #include "libserial.h"
 
@@ -13,29 +12,45 @@ List *readScales() {
     List *scales, *openTxns;
     int time, txnId;
     Scale *curScale = NULL;
-    char opCode, attr;
+    char opCode, attrName;
 
     scales = ListCreate();    // Lista de escalonamentos
     openTxns = ListCreate();  // Lista de transações em andamento
 
     while (fgets(line, 255, stdin)) {
+        // Cria um novo escalonamento se não há transações ativas
         if (ListIsEmpty(openTxns)) {
             curScale = ListInsertScale(scales, curScale);
         }
 
-        sscanf(line, "%d %d %c %c", &time, &txnId, &opCode, &attr);
+        sscanf(line, "%d %d %c %c", &time, &txnId, &opCode, &attrName);
+        // Busca a transação com o timestamp fornecido
         Txn *curTxn = ListFindKey(curScale->txns, &txnId, &compareTxnId);
+        Attr *curAttr = ListFindKey(curScale->attrs, &attrName, &compareAttrName);
         OpType op = ConvertOpType(opCode);
 
         if (op == COMMIT) {
             ListSoftRemoveKey(openTxns, curTxn, &compareTxns);
         } else {
+            // Se o atributo operado não está na lista de atributos do escalonamento, insere-o
+            if (curAttr == NULL) {
+                curAttr = CreateAttr(attrName);
+                ListInsertEnd(curScale->attrs, curAttr);
+            }
+
+            if (op == WRITE) {
+                curAttr->lastWritter = time;
+            }
+
             if (curTxn != NULL) {
-                ListInsertEnd(curTxn->ops, CreateOp(time, op, attr));
+                // Se o timestamp fornecido for de uma transação existente, apenas insere a operação
+                ListInsertEnd(curTxn->ops, CreateOp(time, op, attrName, curAttr->lastWritter));
             } else {
+                // Cria também a transação se o timestamp fornecido não pertencer a transação existente
                 curTxn = CreateTxn(txnId);
                 ListInsertEnd(curScale->txns, curTxn);
-                ListInsertEnd(curTxn->ops, CreateOp(time, op, attr));
+                ListInsertEnd(curTxn->ops, CreateOp(time, op, attrName, curAttr->lastWritter));
+                // Insere a transação na lista de transações abertas
                 ListInsertEnd(openTxns, curTxn);
             }
         }

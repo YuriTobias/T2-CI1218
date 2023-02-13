@@ -3,60 +3,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int lastWrite(Scale *s) {
-    Node *curTxnNode = s->txns->head;
-    int last = -1;
-    // Itera todas as transações do escalonamento em busca da última operação WRITE (max{op->time})
-    while (curTxnNode != NULL) {
-        Txn *curTxn = ((Txn *)curTxnNode->key);
-        Node *curOpNode = curTxn->ops->head;
-
-        while (curOpNode != NULL) {
-            Op *curOp = ((Op *)curOpNode->key);
-
-            if (curOp->time > last) {
-                last = curOp->time;
-            }
-
-            curOpNode = curOpNode->next;
-        }
-
-        curTxnNode = curTxnNode->next;
-    }
-
-    return last;
-}
-
-int checkViewEquivalence(List *opsEmpilhadas, int lastWrite) {
+int checkViewEquivalence(List *opsEmpilhadas, List *scaleAttrs) {
     Node *curOpNode = opsEmpilhadas->head;
     // Itera por todas as operações do escalonamento S' para avaliar sua equivalência com o S original
     while (curOpNode != NULL) {
         Op *curOp = ((Op *)curOpNode->key);
+        Attr *curOpAttr = ((Attr *)ListFindKey(scaleAttrs, &curOp->attr, &compareAttrName));
 
         if (curOp->type == READ) {
             // Checa se não há writes anteriores ao read que deveriam estar após ele
-            Node *prevNode = curOpNode->prev;
-            while (prevNode != NULL) {
-                Op *prevOp = ((Op *)prevNode->key);
+            Node *prevOpNode = curOpNode->prev;
+            int foundWritter = 0;
+            while (prevOpNode != NULL && foundWritter == 0) {
+                Op *prevOp = ((Op *)prevOpNode->key);
 
-                if (prevOp->type == WRITE && prevOp->time > curOp->time) {
-                    return 0;
+                if (prevOp->type == WRITE && prevOp->attr == curOp->attr) {
+                    // Checa se o primeiro WRITE encontrado for diferente do esperado ou sequer era esperado
+                    if (curOp->lastWritter == -1 || curOp->lastWritter != prevOp->time) {
+                        return 0;
+                    } else {
+                        foundWritter = 1;
+                    }
                 }
 
-                prevNode = prevNode->prev;
+                prevOpNode = prevOpNode->prev;
             }
-
-        } else if (curOp->type == WRITE && curOp->time == lastWrite) {
+            // Checa se não foi encontrado WRITE em caso onde era esperado
+            if (foundWritter == 0 && curOp->lastWritter != -1) {
+                return 0;
+            }
+        } else if (curOp->type == WRITE && curOp->time == curOpAttr->lastWritter) {
             // Checa se não há writes posteriores após o que deveria ser o último
-            Node *nexNode = curOpNode->next;
-            while (nexNode != NULL) {
-                Op *nextOp = ((Op *)nexNode->key);
-
-                if (nextOp->type == WRITE && nextOp->time > curOp->time) {
+            Node *nextOpNode = curOpNode->next;
+            while (nextOpNode != NULL) {
+                Op *nextOp = ((Op *)nextOpNode->key);
+                if (nextOp->type == WRITE && nextOp->attr == curOp->attr) {
                     return 0;
                 }
 
-                nexNode = nexNode->next;
+                nextOpNode = nextOpNode->next;
             }
         }
 
@@ -65,11 +50,10 @@ int checkViewEquivalence(List *opsEmpilhadas, int lastWrite) {
     return 1;
 }
 
-int swapTxns(List *stackedOps, List *availableTxns, int lastWrite) {
+int swapTxns(List *stackedOps, List *availableTxns, List *scaleAttrs) {
     int equiv = 0;
     if (ListIsEmpty(availableTxns)) {
-        return checkViewEquivalence(stackedOps, lastWrite);
-
+        return checkViewEquivalence(stackedOps, scaleAttrs);
     } else {
         // Itera pelas transações ainda não empilhadas, realizando chamadas recursivas para cada caminho possível
         Node *curTxnNode = availableTxns->head;
@@ -88,16 +72,17 @@ int swapTxns(List *stackedOps, List *availableTxns, int lastWrite) {
             }
 
             // Chama a recusão para avaliar as combinações possíveis para as transações ainda disponíveis
-            equiv = swapTxns(stackedOpsRec, availableTxnsRec, lastWrite);
+            equiv = swapTxns(stackedOpsRec, availableTxnsRec, scaleAttrs);
 
             // Desaloca as listas auxiliares que voltam alteradas da recursão
             ListSoftRemoveAll(stackedOpsRec);
             ListSoftRemoveAll(availableTxnsRec);
             free(availableTxnsRec);
             free(stackedOpsRec);
+
             curTxnNode = curTxnNode->next;
         }
-        return 0;
+        return equiv;
     }
 }
 
@@ -108,7 +93,7 @@ int swapAndCheckEquivalence(Scale *s) {
     // todas as transações.
     List *availableTxns = ListCopy(s->txns);
 
-    int equiv = swapTxns(stackedOps, availableTxns, lastWrite(s));
+    int equiv = swapTxns(stackedOps, availableTxns, s->attrs);
 
     ListSoftRemoveAll(stackedOps);
     ListSoftRemoveAll(availableTxns);

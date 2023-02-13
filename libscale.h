@@ -15,6 +15,7 @@ typedef struct {
     int time;
     OpType type;
     char attr;
+    int lastWritter;
 } Op;
 
 typedef struct {
@@ -22,7 +23,13 @@ typedef struct {
     int serial;
     int equiv;
     List *txns;
+    List *attrs;
 } Scale;
+
+typedef struct {
+    char name;
+    int lastWritter;
+} Attr;
 
 /*!
  * @name CreateScale
@@ -40,7 +47,7 @@ Scale *CreateScale(int id);
  * @param attr O atributo o qual a operação está manipulando.
  * @result Um ponteiro para a operação criada.
  */
-Op *CreateOp(int time, OpType type, char attr);
+Op *CreateOp(int time, OpType type, char attr, int lastWritter);
 
 /*!
  * @name CreateTxn
@@ -91,5 +98,31 @@ int compareTxns(void *txnA, void *txnB);
  * @result 1 se a transação tiver o id recebido, 0 caso contrário.
  */
 int compareTxnId(void *txn, void *id);
+
+/*!
+ * @name CreateAttr
+ * @brief Aloca e inicializa um atributo operado do escalonamento.
+ * @param name O nome do atributo operado.
+ * @result Um ponteiro para o atributo criado.
+ */
+Attr *CreateAttr(char name);
+
+/*!
+ * @name compareAttrs
+ * @brief Compara dois atributos de acordo com seus nomes, independente dos objetos serem iguais ou não.
+ * @param attrA Um atributo.
+ * @param attrB Um atributo.
+ * @result 1 se os atributos tiverem o mesmo nome, 0 caso contrário.
+ */
+int compareAttrs(void *attrA, void *attrB);
+
+/*!
+ * @name compareAttrName
+ * @brief Checa se o nome de um atributo corresponde a um nome recebido.
+ * @param txn Um atributo.
+ * @param name Um nome de atributo.
+ * @result 1 se o atributo tiver o nome recebido, 0 caso contrário.
+ */
+int compareAttrName(void *attr, void *name);
 
 #endif
