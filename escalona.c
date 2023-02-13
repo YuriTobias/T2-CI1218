@@ -5,6 +5,7 @@
 #include "liblist.h"
 #include "libscale.h"
 #include "libvieweq.h"
+#include "libserial.h"
 
 List *readScales() {
     char *line = malloc(sizeof(char) * 255);
@@ -65,7 +66,7 @@ void checkResults(List *scales) {
 
     while (curScNode != NULL) {
         Scale *curSc = ((Scale *)curScNode->key);
-        curSc->serial = 0;
+        curSc->serial = (checksSeriality(curSc));
         curSc->equiv = (swapAndCheckEquivalence(curSc));
         curScNode = curScNode->next;
     }
