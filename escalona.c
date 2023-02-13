@@ -4,7 +4,6 @@
 
 #include "liblist.h"
 #include "libscale.h"
-#include "libstack.h"
 #include "libvieweq.h"
 
 List *readScales() {
